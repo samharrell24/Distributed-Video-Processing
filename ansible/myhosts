@@ -1,0 +1,11 @@
+[master]
+node0
+
+[worker]
+node1
+node2
+node3
+
+[all:children]
+master
+worker
