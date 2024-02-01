@@ -1,0 +1,49 @@
+---
+
+- hosts: all
+
+  tasks:
+  - name: Install Git
+    ansible.builtin.package:
+      name: git
+      state: latest
+  # OpenMP
+  - name: Copy OpenMP File to RPI
+    ansible.builtin.copy:
+      src: ../../test_code/openmp_helloworld.cpp
+      dest: /home/sam/openmp_helloworld.cpp
+      owner: sam
+      group: sam
+      mode: '0644'
+  - name: Test OpenMP functionality
+    ansible.builtin.shell: |
+      g++ openmp_helloworld.cpp -o test.o -fopenmp
+      ./test.o
+    register: OpenMPresults
+  - name: Output OpenMP
+    debug: 
+      var: OpenMPresults
+  # OpenMPI
+  - name: Install OpenMPI
+    ansible.builtin.package:
+      name:
+        - openmpi-bin
+        - openmpi-doc
+        - libopenmpi-dev
+      state: latest
+  - name: Copy OpenMPI File to RPI
+    ansible.builtin.copy:
+      src: ../../test_code/openmpi_helloworld.cpp
+      dest: /home/sam/openmpi_helloworld.cpp
+      owner: sam
+      group: sam
+      mode: '0644'
+  # - name: Test OpenMPI functionality
+  #   ansible.builtin.shell: |
+  #     mpicc openmpi_helloworld.cpp -o openmpi
+  #     mpiexec -n 4 ./openmpi
+  #   register: OpenMPIresults
+    
+  # - name: Output OpenMPI
+  #   debug: 
+  #     var: OpenMPIresults
