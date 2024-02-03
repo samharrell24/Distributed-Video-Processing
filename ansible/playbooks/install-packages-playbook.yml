@@ -3,47 +3,96 @@
 - hosts: all
 
   tasks:
-  - name: Install Git
-    ansible.builtin.package:
-      name: git
-      state: latest
-  # OpenMP
-  - name: Copy OpenMP File to RPI
-    ansible.builtin.copy:
-      src: ../../test_code/openmp_helloworld.cpp
-      dest: /home/sam/openmp_helloworld.cpp
-      owner: sam
-      group: sam
-      mode: '0644'
-  - name: Test OpenMP functionality
-    ansible.builtin.shell: |
-      g++ openmp_helloworld.cpp -o test.o -fopenmp
-      ./test.o
-    register: OpenMPresults
-  - name: Output OpenMP
-    debug: 
-      var: OpenMPresults
-  # OpenMPI
-  - name: Install OpenMPI
-    ansible.builtin.package:
-      name:
-        - openmpi-bin
-        - openmpi-doc
-        - libopenmpi-dev
-      state: latest
-  - name: Copy OpenMPI File to RPI
-    ansible.builtin.copy:
-      src: ../../test_code/openmpi_helloworld.cpp
-      dest: /home/sam/openmpi_helloworld.cpp
-      owner: sam
-      group: sam
-      mode: '0644'
+  # - name: Install Git
+  #   ansible.builtin.package:
+  #     name: git
+  #     state: latest
+  # - name: Install vim
+  #   ansible.builtin.package:
+  #     name: vim
+  #     state: latest
+
+  # # OpenMP
+  # - name: Copy OpenMP File to RPI
+  #   ansible.builtin.copy:
+  #     src: ../../test_code/openmp_helloworld.cpp
+  #     dest: /home/sam/openmp_helloworld.cpp
+  #     owner: sam
+  #     group: sam
+  #     mode: '0644'
+  # - name: Test OpenMP functionality
+  #   ansible.builtin.shell: |
+  #     g++ openmp_helloworld.cpp -o test.o -fopenmp
+  #     ./test.o
+  #   register: OpenMPresults
+  # - name: Output OpenMP
+  #   debug: 
+  #     var: OpenMPresults
+
+  # # OpenMPI
+  # - name: Install OpenMPI
+  #   ansible.builtin.package:
+  #     name:
+  #       - openmpi-bin
+  #       - openmpi-doc
+  #       - libopenmpi-dev
+  #     state: latest
+  # - name: Copy OpenMPI File to RPI
+  #   ansible.builtin.copy:
+  #     src: ../../test_code/openmpi_helloworld.cpp
+  #     dest: /home/sam/openmpi_helloworld.cpp
+  #     owner: sam
+  #     group: sam
+  #     mode: '0644'
   # - name: Test OpenMPI functionality
   #   ansible.builtin.shell: |
   #     mpicc openmpi_helloworld.cpp -o openmpi
   #     mpiexec -n 4 ./openmpi
   #   register: OpenMPIresults
-    
   # - name: Output OpenMPI
   #   debug: 
   #     var: OpenMPIresults
+
+  # NFS!!!
+  # https://bluexp.netapp.com/blog/azure-anf-blg-linux-nfs-server-how-to-set-up-server-and-client
+  
+  # NFS Server Set-Up on Master
+  # - name: Install NFS-Kernel-Server
+  #   ansible.builtin.package:
+  #     name: nfs-kernel-server
+  #     state: latest
+  #   when: inventory_hostname in groups['master']
+  # - name: NFS Share set up
+  #   ansible.builtin.shell: |
+  #     sudo mkdir /mnt/shareddrive2
+  #     sudo chown nobody:nogroup /mnt/shareddrive2
+  #     sudo chmod 777 /mnt/shareddrive2
+  #   when: inventory_hostname in groups['master']
+  # - name: Update /etc/exports file manually (Check LINK on formatting file)
+  # - name: NFS Share Restart
+  #   ansible.builtin.shell: |
+  #     sudo exportfs -a
+  #     sudo systemctl restart nfs-kernel-server
+  #   when: inventory_hostname in groups['master']
+
+  # - name: Install NFS-Common
+  #   ansible.builtin.package:
+  #     name: nfs-common
+  #     state: latest
+  #   when: inventory_hostname in groups['worker']
+
+  # [TODO]
+  # - name: Mount NFS File Share 
+  #   ansible.builtin.shell: |
+  #     sudo mkdir /var/shareddrive
+  #   become: true
+  #   when: inventory_hostname in groups['worker']
+
+  # [TODO] Ansible
+  # Update /etc/fstab with {IP of NFS server}:{folder path on server} /var/locally-mounted nfs defaults 0 0 (tab separating)
+  
+  - name: Restart NFS File Share
+    ansible.builtin.shell: |
+      systemctl daemon-reload
+      mount /var/shareddrive
+    when: inventory_hostname in groups['worker']
