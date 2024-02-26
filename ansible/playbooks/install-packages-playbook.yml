@@ -29,13 +29,16 @@
   #   debug: 
   #     var: OpenMPresults
 
+# TODO MAYBE remove dup entries in NODE0
+
   # # OpenMPI
   # - name: Install OpenMPI
   #   ansible.builtin.package:
   #     name:
-  #       - openmpi-bin
-  #       - openmpi-doc
-  #       - libopenmpi-dev
+        # - openmpi-common
+        # - openmpi-bin
+        # - openmpi-doc
+        # - libopenmpi-dev
   #     state: latest
   # - name: Copy OpenMPI File to RPI
   #   ansible.builtin.copy:
