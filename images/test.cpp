@@ -29,7 +29,7 @@ int main(){
     }
     printf("Loaded image with a width of %dpx, a height of %dpx and %d channels\n", x, y, n);
 
-    unsigned char nestedArary[x+1][y+1];
+    unsigned char nestedArary[x+2][y+2];
     
     std::cout << "rows: " << x << "\n" << "cols: " << y << "\n";
 
@@ -45,10 +45,7 @@ int main(){
 
     for(int row = 0; row<x; ++row){
         for(int col = 0; col<y; ++col){
-            if(row == 0){
-                
-            }
-            nestedArary[row][col] = data[row*y+col];
+            nestedArary[row+1][col+1] = data[row*y+col];
         }
     }
 
@@ -58,38 +55,43 @@ int main(){
         {-1, 0, 1}
     };
     int kernelY[3][3] = {
-        {-1, -2, -1},
+        {1, 2, 1},
         {0, 0, 0},
-        {1, 2, 1}
+        {-1, -2, -1}
     };
 
     // nestedArray[-1][-1] return 00 is UNDEFINED BEHAVIOR AND BAD C++
     int gradientX,gradientY,temp_j,temp_k;
     int G_magnitude = 0;
-    for(int row = 0; row<x; ++row){
-        for(int col = 0; col<y; ++col){
+    for(int row = 1; row<x; ++row){
+        for(int col = 1; col<y; ++col){
             
             for(int j=-1;j<=1;++j){
                 gradientX = 0;
                 gradientY= 0;
                 for(int k=-1;k<=1;++k){
-                    if(row==0){
-                        temp_j=-1;
-                    }
-                    if(col==0){
-                        temp_k=-1;
-                    }
+                    // if(row==0){
+                    //     temp_j=-1;
+                    // }
+                    // if(col==0){
+                    //     temp_k=-1;
+                    // }
                     // std::cout<<k;
                     // break;
-                    gradientX += nestedArary[row+j+temp_j][col+k+temp_k] * kernelX[j+1][k+1];
-                    gradientY += nestedArary[row+j+temp_j][col+k+temp_k] * kernelX[j+1][k+1];
+                    // gradientX += nestedArary[row+j+temp_j][col+k+temp_k] * kernelX[j+1][k+1];
+                    // gradientY += nestedArary[row+j+temp_j][col+k+temp_k] * kernelX[j+1][k+1];
+
+                    gradientX += nestedArary[row+j][col+k] * kernelX[j+1][k+1];
+                    gradientY += nestedArary[row+j][col+k] * kernelX[j+1][k+1];
+                
                 }
             }
             G_magnitude = sqrt((pow(gradientX,2)+pow(gradientY,2)));
 
-            std::cout << G_magnitude<<"\n";
+            // std::cout << G_magnitude<<"\n";
+            // nestedArary[row][col]=gradientX;
             // std::cout << gradientX+gradientY<<"\n";
-            nestedArary[row][col]=std::min(std::max(G_magnitude,0),255);
+            nestedArary[row][col]=std::min(std::max(gradientY,0),255);
         }
     }
 
@@ -97,9 +99,6 @@ int main(){
 
     for (int row = 0; row < x; ++row) {
         for (int col = 0; col < y; ++col) {
-            // if (col%2==0){
-            //     continue;
-            // }
             data[row*y+col] = nestedArary[row][col];
         }
     }
