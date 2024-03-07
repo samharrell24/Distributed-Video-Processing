@@ -81,11 +81,6 @@ int main(){
                     gradientY += nestedArray[row+j][col+k] * kernelY[j+1][k+1];
                 }
             }
-            // for (int a = 0; a < 3; a++) {
-            //     for (int b = 0; b < 3; b++) {
-            //         gradientX += data[(row - 1 + a) * y + col - 1 + b] * kernelX[a][b];   
-            //     }
-            // }
 
             G_magnitude = sqrt(gradientX * gradientX + gradientY*gradientY);
             G_magnitude = std::min(std::max(G_magnitude, 0), 255);
