@@ -1,4 +1,0 @@
-Loaded image with a width of 320px, a height of 240px and 3 channels
-Ü
-0 
-1
