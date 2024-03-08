@@ -32,3 +32,10 @@
 *.app
 
 .vscode
+
+/images/bin/*
+/images/lib/*
+/images/lib64
+/images/oldtest
+/images/test
+/images/share/*
