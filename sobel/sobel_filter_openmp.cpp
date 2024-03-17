@@ -6,6 +6,7 @@
 #include "stb_image_write.h"
 #include <cmath>
 #include <string>
+#include <mpi.h>
 
 void check_file(char const *filename){
     // Using & allows for pass by reference and gurantees not a NULL value
@@ -61,6 +62,8 @@ int main(){
 
     // nestedArray[-1][-1] return 00 is UNDEFINED BEHAVIOR AND BAD C++
     // TODO: Handle edge
+
+    #pragma parallel for private(gradientX,)
     int gradientX,gradientY;
     int G_magnitude = 0;
     for(int row = 1; row<x-1; ++row){
