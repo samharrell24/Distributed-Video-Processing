@@ -10,7 +10,9 @@
 
 ### Helpful Commands
 ```bash
-ompi_info
+compiling openmp code
+
+g++ sobel_filter_openmp.cpp -fopenmp
 
 mpic++ file.cc
 ```

@@ -98,4 +98,5 @@
     ansible.builtin.shell: |
       systemctl daemon-reload
       mount /var/shareddrive
+      mount 10.0.50.130:/mnt/shareddrive/
     when: inventory_hostname in groups['worker']
