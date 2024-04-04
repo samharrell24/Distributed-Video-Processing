@@ -96,44 +96,44 @@ void do_stuff(char const *filename, char const *outputfile){
 }
 
 int main(int argc, char *argv[]){
-    int p, rank, c;
+    int p, rank;
     const char delimeter='/';
     std::string path = "../video/snail_frames";
     std::string output_path = "../video/snail_frames";
+    std::deque<const char*> dq;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    std::deque<const char*> dq;
-
-    if (rank==0) {
-        std::cout << "TEST";
-
+    if (rank==0){
         for (const auto& entry : fs::directory_iterator(path)) {
             if (fs::is_regular_file(entry)) {
                 std::cout << entry.path().filename() << '\n';
                 const char* fn = entry.path().c_str();
-                std::string o = output_path+entry.path().filename().string();
-                const char* outputfile = o.c_str();
+                // std::string o = output_path+entry.path().filename().string();
+                // const char* outputfile = o.c_str();
                 
                 std::cout << fn;
-                MPI_Barrier(MPI_COMM_WORLD);
                 dq.push_back(fn);
             }   
         }
+
+        std::cout << "Main Thing @ Rank: "<<rank<<"\n";
+        MPI_Barrier(MPI_COMM_WORLD);
     }
     else {
+        MPI_Barrier(MPI_COMM_WORLD);
+        std::cout << "Other Thread @ Rank: "<<rank<<"\n";
+        // const char* file_bmp = dq.front();
+        // dq.pop_front();
 
-        const char* file_bmp = dq.front();
-        dq.pop_front();
+        // std::string appended = file_bmp;
+        // appended += ".bmp";
+        // const char* output_file = appended.c_str();
 
-        std::string appended = file_bmp;
-        appended += ".bmp";
-        const char* output_file = appended.c_str();
-
-        std::cout << output_file;
-        std::cout<< file_bmp << " " << rank;
+        // std::cout << output_file;
+        // std::cout<< file_bmp << " " << rank;
 
         // do_stuff(file_bmp,output_file);
         // MPI_Barrier(MPI_COMM_WORLD);
