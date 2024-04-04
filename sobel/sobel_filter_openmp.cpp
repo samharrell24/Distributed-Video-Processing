@@ -109,12 +109,9 @@ int main(int argc, char *argv[]){
     if (rank==0){
         for (const auto& entry : fs::directory_iterator(path)) {
             if (fs::is_regular_file(entry)) {
-                std::cout << entry.path().filename() << '\n';
-                const char* fn = entry.path().c_str();
-                // std::string o = output_path+entry.path().filename().string();
-                // const char* outputfile = o.c_str();
-                
-                std::cout << fn;
+                // std::cout << entry.path().filename() << '\n';
+                const char* fn = entry.path().c_str();               
+                // std::cout << fn;
                 dq.push_back(fn);
             }   
         }
@@ -125,15 +122,18 @@ int main(int argc, char *argv[]){
     else {
         MPI_Barrier(MPI_COMM_WORLD);
         std::cout << "Other Thread @ Rank: "<<rank<<"\n";
-        // const char* file_bmp = dq.front();
-        // dq.pop_front();
+        const char* file_bmp = dq.front();
+        std::cout << "Do you see me? @ Rank: " << rank << "\n";
+        // std::cout << "Do something Other Thread @ Rank: "<<rank<<"\n";
+        dq.pop_front();
 
         // std::string appended = file_bmp;
         // appended += ".bmp";
         // const char* output_file = appended.c_str();
-
+        
         // std::cout << output_file;
-        // std::cout<< file_bmp << " " << rank;
+        // std::cout<< " Other Thread @ Rank " << rank << "\n";
+
 
         // do_stuff(file_bmp,output_file);
         // MPI_Barrier(MPI_COMM_WORLD);
