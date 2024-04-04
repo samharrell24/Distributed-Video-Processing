@@ -3,11 +3,15 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STBI_FAILURE_USERMSG
 #include "stb_image.h"
-#include "stb_image_write.h"
+#include "stb_image_write.h"    
 #include <cmath>
 #include <string>
 #include <omp.h>
 #include <filesystem>
+#include <sstream>
+#include <vector>
+#include <mpi.h>
+#include <deque>
 
 namespace fs = std::filesystem;
 
@@ -20,16 +24,15 @@ void check_file(char const *filename){
     std::cout << result << "\n";
 }
 
-int main(){
+
+
+void do_stuff(char const *filename, char const *outputfile){
     int x,y,n;
-    // check_file("video/snail_frames/out5.bmp");
     // last parameter forces number of desired channels. We only want grey so we set it to 1
-    unsigned char* data = stbi_load("../video/snail_frames/out5.bmp", &y, &x, &n, 1);
-    // unsigned char* data = stbi_load("../images/box_320x240.bmp", &y, &x, &n, 1);
 
-    // printf("%d",x);
-    // printf("%d",y);
+    std::cout << filename << "\n";
 
+    unsigned char* data = stbi_load(filename, &y, &x, &n, 1);
 
     // if(data == NULL){
     //     printf("Error in loading image");
@@ -38,21 +41,6 @@ int main(){
     // printf("Loaded image with a width of %dpx, a height of %dpx and %d channels\n", y, x, n);
 
     unsigned char nestedArray[x][y];
-    
-    // std::string path = "../video/snail_frames";
-    // for (const auto & entry : fs::directory_iterator(path)) {
-	//     std::cout << entry.path() << std::endl;
-    // }
-
-    // WHY ++row rather than row++?
-  
-    int th_id;
-
-    // #pragma omp parallel private(th_id)
-    // {
-        // th_id = omp_get_thread_num();
-    //     printf("Hello World from thread %d\n", th_id);
-    // }
 
     // Pre-increment (++row)
     // int row1 = 5;
@@ -81,22 +69,15 @@ int main(){
         {1, 2, 1}
     };
 
-    // nestedArray[-1][-1] return 00 is UNDEFINED BEHAVIOR AND BAD C++
-    // TODO: Handle edge
-
-    // int r = x % 2;
-    // printf("%d", r);
-    // int p = y % 2;
-    // printf("%d", p);
-
-    // int gradientX,gradientY;
     int gradientX,gradientY,row,col,j,k;
     int G_magnitude = 0;
+    int th_id;
+
     #pragma omp parallel for private(row,col,gradientX,gradientY,j,k,G_magnitude)
     for(int row = 1; row<x-1; ++row){
+            // th_id = omp_get_thread_num();
+            // printf("%d",th_id);
         for(int col = 1; col<y-1; ++col){
-                th_id = omp_get_thread_num();
-                printf("%d",th_id);
                 gradientX = 0;
                 gradientY= 0;
             for(int j=-1;j<=1;++j){             
@@ -110,13 +91,55 @@ int main(){
         }
     }
 
-    // You cannot directly convert unsigned char* to const void*
-    // const_cast is used to remove const qualifier
-    // const void* data2 = static_cast<const void*>(data);
-    int out;
-    out = stbi_write_bmp("out5_changed.bmp", y, x, 1, data);
-    // std::cout << x;
-    // std::cout << y;
-
+    stbi_write_bmp(outputfile, y, x, 1, data);
     stbi_image_free(data);
+}
+
+int main(int argc, char *argv[]){
+    int p, rank, c;
+    const char delimeter='/';
+    std::string path = "../video/snail_frames";
+    std::string output_path = "../video/snail_frames";
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &p);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    std::deque<const char*> dq;
+
+    if (rank==0) {
+        std::cout << "TEST";
+
+        for (const auto& entry : fs::directory_iterator(path)) {
+            if (fs::is_regular_file(entry)) {
+                std::cout << entry.path().filename() << '\n';
+                const char* fn = entry.path().c_str();
+                std::string o = output_path+entry.path().filename().string();
+                const char* outputfile = o.c_str();
+                
+                std::cout << fn;
+                MPI_Barrier(MPI_COMM_WORLD);
+                dq.push_back(fn);
+            }   
+        }
+    }
+    else {
+
+        const char* file_bmp = dq.front();
+        dq.pop_front();
+
+        std::string appended = file_bmp;
+        appended += ".bmp";
+        const char* output_file = appended.c_str();
+
+        std::cout << output_file;
+        std::cout<< file_bmp << " " << rank;
+
+        // do_stuff(file_bmp,output_file);
+        // MPI_Barrier(MPI_COMM_WORLD);
+
+        
+    }
+    
+    MPI_Finalize();    
 }
