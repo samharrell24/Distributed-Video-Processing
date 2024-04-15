@@ -34,7 +34,7 @@ void do_stuff(char const *filename, char const *outputfile){
     int x,y,n;
     // last parameter forces number of desired channels. We only want grey so we set it to 1
 
-    std::cout << filename << "\n";
+    // std::cout << filename << "\n";
 
     unsigned char* data = stbi_load(filename, &y, &x, &n, 1);
 
@@ -93,7 +93,7 @@ void do_stuff(char const *filename, char const *outputfile){
         }
     }
 
-    std::cout << outputfile << "\n";
+    // std::cout << outputfile << "\n";
 
     stbi_write_bmp(outputfile, y, x, 1, data);
     stbi_image_free(data);
@@ -127,7 +127,19 @@ int main(int argc, char *argv[]){
         //     }   
         // }
 
-        // int dq_size = dq.size();
+        std::string directory_path = "../video/snail_frames/";
+        int bmp_count = 0;
+        
+        for (const auto& entry : fs::directory_iterator(directory_path)) {
+            if (entry.path().extension() == ".bmp") {
+                bmp_count++;
+            }
+        }
+
+        int buffer[bmp_count];
+        for (int i = 1; i < bmp_count+1; ++i) {
+            buffer[i] = i;
+        }
 
         // std::cout << "Main Thing @ Rank: "<<rank<<" dq_size: "<<dq_size<<" \n";
         MPI_Barrier(MPI_COMM_WORLD);
@@ -135,10 +147,11 @@ int main(int argc, char *argv[]){
         int recv;
         int t = 0;
         int buffer[20] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
-        MPI_Scatter(buffer, 5, MPI_INT, &my_value, 5,MPI_INT,0,MPI_COMM_WORLD);
+
+        MPI_Scatter(buffer, 6, MPI_INT, &my_value, 5,MPI_INT,0,MPI_COMM_WORLD);
         
         for (int i = 0; i < 5; ++i) {
-            std::cout << "Element " << i << ": " << my_value[i] << std::endl;
+            // std::cout << "Element " << i << ": " << my_value[i] << std::endl;
             std::string f = filename;
             f += std::to_string(my_value[i]); 
             f += ".bmp";
@@ -146,8 +159,8 @@ int main(int argc, char *argv[]){
             o += std::to_string(my_value[i]); 
             o += ".bmp";
            
-            std::cout << f.c_str()<<std::endl;
-            std::cout << o.c_str()<<std::endl;
+            // std::cout << f.c_str()<<std::endl;
+            // std::cout << o.c_str()<<std::endl;
 
             do_stuff(f.c_str(),o.c_str());
         }
@@ -162,7 +175,7 @@ int main(int argc, char *argv[]){
         MPI_Get_processor_name(name,&name_length);
 
         for (int i = 0; i < 5; ++i) {
-            std::cout << "Element " << i << ": " << my_value[i] << std::endl;
+            // std::cout << "Element " << i << ": " << my_value[i] << std::endl;
             std::string f = filename;
             f += std::to_string(my_value[i]); 
             f += ".bmp";
@@ -170,8 +183,8 @@ int main(int argc, char *argv[]){
             o += std::to_string(my_value[i]); 
             o += ".bmp";
            
-            std::cout << f.c_str()<<std::endl;
-            std::cout << o.c_str()<<std::endl;
+            // std::cout << f.c_str()<<std::endl;
+            // std::cout << o.c_str()<<std::endl;
 
             do_stuff(f.c_str(),o.c_str());
         }
