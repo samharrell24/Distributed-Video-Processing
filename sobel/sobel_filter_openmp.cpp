@@ -40,16 +40,6 @@ void do_stuff(char const *filename, char const *outputfile){
 
     unsigned char nestedArray[x][y];
 
-    // Pre-increment (++row)
-    // int row1 = 5;
-    // int result1 = ++row1;  **Increment row first, then use the updated value
-
-    // // Post-increment (row++)
-    // int row2 = 5;
-    // int result2 = row2++;  **Use row's current value first, then increment row
-
-    // Copy into [][] for ease of iteration
-    // TODO: refactor to be more efficent
     for(int row = 0; row<x; ++row){
         for(int col = 0; col<y; ++col){
             nestedArray[row][col] = data[row*y+col];
@@ -92,6 +82,12 @@ void do_stuff(char const *filename, char const *outputfile){
 }
 
 int main(int argc, char *argv[]){
+    // if (argc != 2){
+    //     std::cerr << "Invalid number of arguments.\n./bootstrap.sh video.mp4 outputname.mp4";
+    //     exit(1);
+    // }
+    
+
     const int BROADCAST_ROOT = 0;
     int size, rank;
     std::string filename = "../video/input/out";
@@ -114,18 +110,22 @@ int main(int argc, char *argv[]){
         int remainder = bmp_count % size;
         int num_dummies_to_add = (size - remainder) % size;
 
+        std::cout << "rem:" << remainder << "\n";
+        std::cout << "dum:" << num_dummies_to_add << "\n";
+
+
         int frame_count = bmp_count+num_dummies_to_add;
         int recv;
         int buffer[frame_count];    
 
         int count = num_dummies_to_add;
-        for (int i = 0; i < frame_count; ++i) {
+        for (int i = 0; i < frame_count+1; ++i) {
             if (count > 0){
                 buffer[i] = 0;
                 count -= 1;
             }
             else{
-                buffer[i] = i;
+                buffer[i] = i+1;
             }
         }
 
