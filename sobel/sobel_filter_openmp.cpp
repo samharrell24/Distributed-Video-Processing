@@ -4,18 +4,12 @@
 #define STBI_FAILURE_USERMSG
 #include "stb_image.h"
 #include "stb_image_write.h"    
-#include <cmath>
 #include <string>
 #include <omp.h>
 #include <filesystem>
-#include <sstream>
-#include <vector>
 #include <mpi.h>
-#include <chrono>
-#include <thread>
-#include <deque>
-#include <unistd.h>
 #include <iostream>
+#include <math.h>
 
 namespace fs = std::filesystem;
 
@@ -100,10 +94,8 @@ void do_stuff(char const *filename, char const *outputfile){
 int main(int argc, char *argv[]){
     const int BROADCAST_ROOT = 0;
     int size, rank;
-    const char delimeter='/';
     std::string filename = "../video/input/out";
     std::string output_file = "../video/output/out";
-    std::deque<const char*> dq;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -111,30 +103,50 @@ int main(int argc, char *argv[]){
 
     if (rank==0){
         std::string directory_path = "../video/input/";
-        int frame_count = 0;
+        int bmp_count = 0;
         
         for (const auto& entry : fs::directory_iterator(directory_path)) {
             if (entry.path().extension() == ".bmp") {
-                frame_count++;
+                bmp_count++;
             }
         }
 
-        int recv;
-        int buffer[frame_count];
-        for (int i = 1; i < frame_count+1; ++i) {
-            buffer[i] = i;
-        }
-        
-        int num_frames = frame_count / size;
+        int remainder = bmp_count % size;
+        int num_dummies_to_add = (size - remainder) % size;
 
-        std::cout << "f" << 
+        int frame_count = bmp_count+num_dummies_to_add;
+        int recv;
+        int buffer[frame_count];    
+
+        int count = num_dummies_to_add;
+        for (int i = 0; i < frame_count; ++i) {
+            if (count > 0){
+                buffer[i] = 0;
+                count -= 1;
+            }
+            else{
+                buffer[i] = i;
+            }
+        }
+
+        for (int i = 0; i < frame_count; ++i) {
+            std::cout<<buffer[i];
+        }
+
+        int num_frames = frame_count / size;
+        
+        // How to evenly distribute and what to do if not even. Dead frames?
         int my_frames[num_frames];
         MPI_Barrier(MPI_COMM_WORLD);
         MPI_Bcast(&num_frames, 1, MPI_INT, BROADCAST_ROOT, MPI_COMM_WORLD);
         MPI_Scatter(buffer, num_frames, MPI_INT, &my_frames, num_frames, MPI_INT, BROADCAST_ROOT, MPI_COMM_WORLD);
         
         for (int i = 0; i < num_frames; ++i) {
-            // std::cout << "Element " << i << ": " << my_value[i] << std::endl;
+            if (my_frames[i] == 0){
+                std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
+                continue;
+            }
+            std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
             std::string f = filename;
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
@@ -163,7 +175,11 @@ int main(int argc, char *argv[]){
         MPI_Scatter(NULL, num_frames, MPI_INT, my_frames, num_frames, MPI_INT, 0, MPI_COMM_WORLD);
 
         for (int i = 0; i < num_frames; ++i) {
-            // std::cout << "Element " << i << ": " << my_value[i] << std::endl;
+            if (my_frames[i] == 0){
+                std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
+                continue;
+            }
+            std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
             std::string f = filename;
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
