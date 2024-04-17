@@ -93,70 +93,53 @@ void do_stuff(char const *filename, char const *outputfile){
         }
     }
 
-    // std::cout << outputfile << "\n";
-
     stbi_write_bmp(outputfile, y, x, 1, data);
     stbi_image_free(data);
 }
 
 int main(int argc, char *argv[]){
-    int p, rank;
+    const int BROADCAST_ROOT = 0;
+    int size, rank;
     const char delimeter='/';
-    std::string filename = "../video/snail_frames/out";
-    std::string output_file = "../video/snail_output_frames/out";
+    std::string filename = "../video/input/out";
+    std::string output_file = "../video/output/out";
     std::deque<const char*> dq;
 
     MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &p);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    // MPI_Request req;
-    // MPI_Status stat;
-    int my_value[5];
-    char name[MPI_MAX_OBJECT_NAME];
-    int name_length;
-
-
     if (rank==0){
-        // for (const auto& entry : fs::directory_iterator(path)) {
-        //     if (fs::is_regular_file(entry)) {
-        //         // std::cout << entry.path().filename() << '\n';
-        //         const char* fn = entry.path().c_str();               
-        //         // std::cout << fn;
-        //         dq.push_back(fn);
-        //     }   
-        // }
-
-        std::string directory_path = "../video/snail_frames/";
-        int bmp_count = 0;
+        std::string directory_path = "../video/input/";
+        int frame_count = 0;
         
         for (const auto& entry : fs::directory_iterator(directory_path)) {
             if (entry.path().extension() == ".bmp") {
-                bmp_count++;
+                frame_count++;
             }
         }
 
-        int buffer[bmp_count];
-        for (int i = 1; i < bmp_count+1; ++i) {
+        int recv;
+        int buffer[frame_count];
+        for (int i = 1; i < frame_count+1; ++i) {
             buffer[i] = i;
         }
-
-        // std::cout << "Main Thing @ Rank: "<<rank<<" dq_size: "<<dq_size<<" \n";
-        MPI_Barrier(MPI_COMM_WORLD);
-
-        int recv;
-        int t = 0;
-        int buffer[20] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
-
-        MPI_Scatter(buffer, 6, MPI_INT, &my_value, 5,MPI_INT,0,MPI_COMM_WORLD);
         
-        for (int i = 0; i < 5; ++i) {
+        int num_frames = frame_count / size;
+
+        std::cout << "f" << 
+        int my_frames[num_frames];
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast(&num_frames, 1, MPI_INT, BROADCAST_ROOT, MPI_COMM_WORLD);
+        MPI_Scatter(buffer, num_frames, MPI_INT, &my_frames, num_frames, MPI_INT, BROADCAST_ROOT, MPI_COMM_WORLD);
+        
+        for (int i = 0; i < num_frames; ++i) {
             // std::cout << "Element " << i << ": " << my_value[i] << std::endl;
             std::string f = filename;
-            f += std::to_string(my_value[i]); 
+            f += std::to_string(my_frames[i]); 
             f += ".bmp";
             std::string o = output_file;
-            o += std::to_string(my_value[i]); 
+            o += std::to_string(my_frames[i]); 
             o += ".bmp";
            
             // std::cout << f.c_str()<<std::endl;
@@ -167,20 +150,25 @@ int main(int argc, char *argv[]){
         
     }
     else {
-        MPI_Barrier(MPI_COMM_WORLD);
-        int comm_size;
-        MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-
-        MPI_Scatter(NULL, 5, MPI_INT, my_value,5, MPI_INT, 0, MPI_COMM_WORLD);
+        int num_frames;
+        char name[MPI_MAX_OBJECT_NAME];
+        int name_length;
         MPI_Get_processor_name(name,&name_length);
 
-        for (int i = 0; i < 5; ++i) {
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast(&num_frames, 1, MPI_INT, BROADCAST_ROOT, MPI_COMM_WORLD);
+
+        int my_frames[num_frames];
+
+        MPI_Scatter(NULL, num_frames, MPI_INT, my_frames, num_frames, MPI_INT, 0, MPI_COMM_WORLD);
+
+        for (int i = 0; i < num_frames; ++i) {
             // std::cout << "Element " << i << ": " << my_value[i] << std::endl;
             std::string f = filename;
-            f += std::to_string(my_value[i]); 
+            f += std::to_string(my_frames[i]); 
             f += ".bmp";
             std::string o = output_file;
-            o += std::to_string(my_value[i]); 
+            o += std::to_string(my_frames[i]); 
             o += ".bmp";
            
             // std::cout << f.c_str()<<std::endl;
