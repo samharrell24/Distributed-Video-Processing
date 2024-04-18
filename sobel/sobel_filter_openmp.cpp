@@ -82,11 +82,6 @@ void do_stuff(char const *filename, char const *outputfile){
 }
 
 int main(int argc, char *argv[]){
-    // if (argc != 2){
-    //     std::cerr << "Invalid number of arguments.\n./bootstrap.sh video.mp4 outputname.mp4";
-    //     exit(1);
-    // }
-    
 
     const int BROADCAST_ROOT = 0;
     int size, rank;
@@ -111,8 +106,7 @@ int main(int argc, char *argv[]){
         int dead_frames = (size - remainder) % size;
 
         std::cout << "rem:" << remainder << "\n";
-        std::cout << "dum:" << dead_frames << "\n";
-
+        std::cout << "dead frames:" << dead_frames << "\n";
 
         int frame_count = bmp_count+dead_frames;
         int recv;
@@ -125,6 +119,8 @@ int main(int argc, char *argv[]){
             std::cout<<buffer[i];
         }
 
+        std::cout << "\n";
+
         int num_frames = frame_count / size;        
         int my_frames[num_frames];
         MPI_Barrier(MPI_COMM_WORLD);
@@ -133,7 +129,7 @@ int main(int argc, char *argv[]){
         
         for (int i = 0; i < num_frames; ++i) {
             if (my_frames[i] == 0){
-                std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
+                // std::cout << "R000" << rank << ": " << my_frames[i] << std::endl;
                 continue;
             }
             std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
@@ -166,10 +162,10 @@ int main(int argc, char *argv[]){
 
         for (int i = 0; i < num_frames; ++i) {
             if (my_frames[i] == 0){
-                std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
+                // std::cout << "R000" << rank << ": " << my_frames[i] << std::endl;
                 continue;
             }
-            std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
+            // std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
             std::string f = filename+"out";
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
