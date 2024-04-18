@@ -94,9 +94,95 @@
   # [TODO] Ansible
   # Update /etc/fstab with {IP of NFS server}:{folder path on server} /var/locally-mounted nfs defaults 0 0 (tab separating)
   
-  - name: Restart NFS File Share
-    ansible.builtin.shell: |
-      systemctl daemon-reload
-      mount /var/shareddrive
-      mount 10.0.50.130:/mnt/shareddrive/
-    when: inventory_hostname in groups['worker']
+  # - name: Restart NFS File Share
+  #   ansible.builtin.shell: |
+  #     systemctl daemon-reload
+  #     mount /var/shareddrive
+  #     mount 10.0.50.130:/mnt/shareddrive/
+  #   when: inventory_hostname in groups['worker']
+
+#########
+# MUNGE #
+#########
+
+  # - name: Install Munge on Master Node
+  #   ansible.builtin.shell: |
+  #     apt install munge libmunge2 libmunge-dev -y
+  #     munge -n | unmunge | grep STATUS
+  #   when: inventory_hostname in groups['master']
+  #   register: MungeMasterNodeOutput
+  # - name: Output MungeMasterNodeOutput
+  #   debug: 
+  #     var: MungeMasterNodeOutput
+
+  # - name: Setup Munge on Master Node
+  #   ansible.builtin.shell: |
+  #     sudo chown -R munge: /etc/munge/ /var/log/munge/ /var/lib/munge/ /run/munge/
+  #     sudo chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/
+  #     sudo chmod 0755 /run/munge/
+  #     sudo chmod 0700 /etc/munge/munge.key
+  #     sudo chown -R munge: /etc/munge/munge.key
+  #     systemctl enable munge
+  #     systemctl restart munge
+  #   when: inventory_hostname in groups['master']
+
+  # - name: Check Munge Status
+  #   ansible.builtin.shell: |
+  #     systemctl status munge
+  #   when: inventory_hostname in groups['master']
+  #   register: MungeStatus
+  # - name: Output MungeStatus
+  #   debug: 
+  #     var: MungeStatus
+
+  # - name: Install Munge on Worker Nodes
+  #   ansible.builtin.shell: |
+  #     apt install munge libmunge2 libmunge-dev -y
+  #     munge -n | unmunge | grep STATUS
+  #   when: inventory_hostname in groups['worker']
+  #   register: MungeWorkerNodeOutput
+  # - name: Output MungeWorkerNodeOutput
+  #   debug: 
+  #     var: MungeWorkerNodeOutput
+
+# Worker Nodes need the same key as the Master node. So I copied it over manually for security.
+  # - name: Setup Munge on Worker Node
+  #   ansible.builtin.shell: |
+  #     sudo chown -R munge: /etc/munge/ /var/log/munge/ /var/lib/munge/ /run/munge/
+  #     sudo chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/
+  #     sudo chmod 0755 /run/munge/
+  #     sudo chmod 0700 /etc/munge/munge.key
+  #     sudo chown -R munge: /etc/munge/munge.key
+  #     systemctl enable munge
+  #     systemctl restart munge
+  #   when: inventory_hostname in groups['worker']
+
+  # - name: Check Munge Worker Status
+  #   ansible.builtin.shell: |
+  #     systemctl status munge
+  #   when: inventory_hostname in groups['worker']
+  #   register: MungeStatusWorker
+  # - name: Output MungeStatusWorker
+  #   debug: 
+  #     var: MungeStatusWorker
+
+#########
+# SLURM #
+#########
+
+  # - name: Install Slurm on All Nodes
+  #   ansible.builtin.shell: |
+  #     sudo apt-get update
+  #     sudo apt-get install slurm-wlm -y
+  # - name: Install Slurm on All Nodes
+  #   ansible.builtin.shell: |
+  #     sudo apt-get update
+  #     sudo apt-get install slurm-wlm -y
+  # - name: Copy file with owner and permissions
+  #   ansible.builtin.copy:
+  #     src: ../../slurm.conf
+  #     dest: /etc/slurm/slurm.conf
+  # - name: Test
+  #   ansible.builtin.command:
+
+
