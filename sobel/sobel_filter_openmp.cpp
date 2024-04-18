@@ -90,8 +90,8 @@ int main(int argc, char *argv[]){
 
     const int BROADCAST_ROOT = 0;
     int size, rank;
-    std::string filename = "../video/input/out";
-    std::string output_file = "../video/output/out";
+    std::string filename = "../video/input/";
+    std::string output_file = "../video/output/";
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -108,34 +108,24 @@ int main(int argc, char *argv[]){
         }
 
         int remainder = bmp_count % size;
-        int num_dummies_to_add = (size - remainder) % size;
+        int dead_frames = (size - remainder) % size;
 
         std::cout << "rem:" << remainder << "\n";
-        std::cout << "dum:" << num_dummies_to_add << "\n";
+        std::cout << "dum:" << dead_frames << "\n";
 
 
-        int frame_count = bmp_count+num_dummies_to_add;
+        int frame_count = bmp_count+dead_frames;
         int recv;
-        int buffer[frame_count];    
+        int buffer[frame_count] = {0};    
 
-        int count = num_dummies_to_add;
-        for (int i = 0; i < frame_count+1; ++i) {
-            if (count > 0){
-                buffer[i] = 0;
-                count -= 1;
-            }
-            else{
-                buffer[i] = i+1;
-            }
+        for (int i = 0; i < frame_count-dead_frames; ++i) {
+            buffer[i] = i+1;
         }
-
         for (int i = 0; i < frame_count; ++i) {
             std::cout<<buffer[i];
         }
 
-        int num_frames = frame_count / size;
-        
-        // How to evenly distribute and what to do if not even. Dead frames?
+        int num_frames = frame_count / size;        
         int my_frames[num_frames];
         MPI_Barrier(MPI_COMM_WORLD);
         MPI_Bcast(&num_frames, 1, MPI_INT, BROADCAST_ROOT, MPI_COMM_WORLD);
@@ -147,10 +137,10 @@ int main(int argc, char *argv[]){
                 continue;
             }
             std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
-            std::string f = filename;
+            std::string f = filename+"out";
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
-            std::string o = output_file;
+            std::string o = output_file+"out";
             o += std::to_string(my_frames[i]); 
             o += ".bmp";
            
@@ -180,10 +170,10 @@ int main(int argc, char *argv[]){
                 continue;
             }
             std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
-            std::string f = filename;
+            std::string f = filename+"out";
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
-            std::string o = output_file;
+            std::string o = output_file+"out";
             o += std::to_string(my_frames[i]); 
             o += ".bmp";
            
