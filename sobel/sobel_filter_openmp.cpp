@@ -85,15 +85,15 @@ int main(int argc, char *argv[]){
 
     const int BROADCAST_ROOT = 0;
     int size, rank;
-    std::string filename = "../video/input/";
-    std::string output_file = "../video/output/";
+    std::string filename = "video/input/";
+    std::string output_file = "video/output/";
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if (rank==0){
-        std::string directory_path = "../video/input/";
+        std::string directory_path = "video/input/";
         int bmp_count = 0;
         
         for (const auto& entry : fs::directory_iterator(directory_path)) {
@@ -105,8 +105,8 @@ int main(int argc, char *argv[]){
         int remainder = bmp_count % size;
         int dead_frames = (size - remainder) % size;
 
-        std::cout << "rem:" << remainder << "\n";
-        std::cout << "dead frames:" << dead_frames << "\n";
+        // std::cout << "rem:" << remainder << "\n";
+        // std::cout << "dead frames:" << dead_frames << "\n";
 
         int frame_count = bmp_count+dead_frames;
         int recv;
@@ -115,9 +115,9 @@ int main(int argc, char *argv[]){
         for (int i = 0; i < frame_count-dead_frames; ++i) {
             buffer[i] = i+1;
         }
-        for (int i = 0; i < frame_count; ++i) {
-            std::cout<<buffer[i];
-        }
+        // for (int i = 0; i < frame_count; ++i) {
+        //     std::cout<<buffer[i];
+        // }
 
         std::cout << "\n";
 
@@ -132,8 +132,8 @@ int main(int argc, char *argv[]){
                 // std::cout << "R000" << rank << ": " << my_frames[i] << std::endl;
                 continue;
             }
-            std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
-            std::string f = filename+"out";
+            std::cout << "Rank" << rank << " completed processing frame " << my_frames[i] << "!"<< std::endl;
+            std::string f = filename+"in";
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
             std::string o = output_file+"out";
@@ -144,6 +144,7 @@ int main(int argc, char *argv[]){
             // std::cout << o.c_str()<<std::endl;
 
             do_stuff(f.c_str(),o.c_str());
+            // std::cout <<"see me? after frame\n";
         }
         
     }
@@ -165,8 +166,9 @@ int main(int argc, char *argv[]){
                 // std::cout << "R000" << rank << ": " << my_frames[i] << std::endl;
                 continue;
             }
-            // std::cout << "R" << rank << ": " << my_frames[i] << std::endl;
-            std::string f = filename+"out";
+            std::cout << "Rank" << rank << " completed processing frame " << my_frames[i] << "!"<< std::endl;
+            // std::cout <<"other see me? before";
+            std::string f = filename+"in";
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
             std::string o = output_file+"out";
