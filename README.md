@@ -2,17 +2,17 @@
 
 ### Original Image
 
-![picture_of_present](/content/box_320x240.bmp)
+![picture_of_present](content/box.bmp)
 
 ### Sobel Filter Applied to Image
 
-![picture_of_sobel_present](/content/box_changes_320x240.bmp)
+![picture_of_sobel_present](/content/box_sobel.bmp)
 
 ### Helpful Commands
 ```bash
-compiling openmp code
+./bootstrap.sh np hostfile content/input_video.mp4 output_video.mp4 frame_rate horizontal_pixels vertical_pixels
 
-g++ sobel_filter_openmp.cpp -fopenmp
+# Below is an example of what I use to process videos for example
 
-mpic++ file.cc
+./bootstrap.sh 4 hostfile content/vertical_dining_2160_3840_25fps.mp4 dining.mp4 25 720 1280
 ```
