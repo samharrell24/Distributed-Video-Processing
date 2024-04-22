@@ -22,14 +22,9 @@ void check_file(char const *filename){
     std::cout << result << "\n";
 }
 
-
-
-void do_stuff(char const *filename, char const *outputfile){
+void sobel_filter(char const *filename, char const *outputfile){
     int x,y,n;
     // last parameter forces number of desired channels. We only want grey so we set it to 1
-
-    // std::cout << filename << "\n";
-
     unsigned char* data = stbi_load(filename, &y, &x, &n, 1);
 
     // if(data == NULL){
@@ -104,10 +99,6 @@ int main(int argc, char *argv[]){
 
         int remainder = bmp_count % size;
         int dead_frames = (size - remainder) % size;
-
-        // std::cout << "rem:" << remainder << "\n";
-        // std::cout << "dead frames:" << dead_frames << "\n";
-
         int frame_count = bmp_count+dead_frames;
         int recv;
         int buffer[frame_count] = {0};    
@@ -115,12 +106,7 @@ int main(int argc, char *argv[]){
         for (int i = 0; i < frame_count-dead_frames; ++i) {
             buffer[i] = i+1;
         }
-        // for (int i = 0; i < frame_count; ++i) {
-        //     std::cout<<buffer[i];
-        // }
-
         std::cout << "\n";
-
         int num_frames = frame_count / size;        
         int my_frames[num_frames];
         MPI_Barrier(MPI_COMM_WORLD);
@@ -132,19 +118,14 @@ int main(int argc, char *argv[]){
                 // std::cout << "R000" << rank << ": " << my_frames[i] << std::endl;
                 continue;
             }
-            std::cout << "Rank" << rank << " completed processing frame " << my_frames[i] << "!"<< std::endl;
+            // std::cout << "Rank" << rank << " completed processing frame " << my_frames[i] << "!"<< std::endl;
             std::string f = filename+"in";
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
             std::string o = output_file+"out";
             o += std::to_string(my_frames[i]); 
             o += ".bmp";
-           
-            // std::cout << f.c_str()<<std::endl;
-            // std::cout << o.c_str()<<std::endl;
-
-            do_stuff(f.c_str(),o.c_str());
-            // std::cout <<"see me? after frame\n";
+            sobel_filter(f.c_str(),o.c_str());
         }
         
     }
@@ -166,19 +147,14 @@ int main(int argc, char *argv[]){
                 // std::cout << "R000" << rank << ": " << my_frames[i] << std::endl;
                 continue;
             }
-            std::cout << "Rank" << rank << " completed processing frame " << my_frames[i] << "!"<< std::endl;
-            // std::cout <<"other see me? before";
+            // std::cout << "Rank" << rank << " completed processing frame " << my_frames[i] << "!"<< std::endl;
             std::string f = filename+"in";
             f += std::to_string(my_frames[i]); 
             f += ".bmp";
             std::string o = output_file+"out";
             o += std::to_string(my_frames[i]); 
             o += ".bmp";
-           
-            // std::cout << f.c_str()<<std::endl;
-            // std::cout << o.c_str()<<std::endl;
-
-            do_stuff(f.c_str(),o.c_str());
+            sobel_filter(f.c_str(),o.c_str());
         }
     }
     
