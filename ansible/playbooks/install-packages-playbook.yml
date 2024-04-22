@@ -94,8 +94,9 @@
   # [TODO] Ansible
   # Update /etc/fstab with {IP of NFS server}:{folder path on server} /var/locally-mounted nfs defaults 0 0 (tab separating)
   
-  - name: Restart NFS File Share
-    ansible.builtin.shell: |
-      systemctl daemon-reload
-      mount /var/shareddrive
-    when: inventory_hostname in groups['worker']
+  # - name: Restart NFS File Share
+  #   ansible.builtin.shell: |
+  #     systemctl daemon-reload
+  #     mount /var/shareddrive
+  #     mount 10.0.50.130:/mnt/shareddrive/
+  #   when: inventory_hostname in groups['worker']
