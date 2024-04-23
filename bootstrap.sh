@@ -27,9 +27,9 @@ num_frames=$(find video/input -type f -name "*.bmp" | wc -l)
 echo -e "${GREEN}Created $num_frames total frames from $3...${NC}\n"
 # #Applying Sobel Filter
 echo -e "${GREEN}Running Sobel Filter across Cluster...${NC}\n$"
-make mpitest np=$1 hostfile=$2
+time make mpitest np=$1 hostfile=$2
 echo -e "${GREEN}SOBEL FILTER COMPLETE${NC}\n"
 # # Stitch frames back together
 echo -e "${GREEN}Stitching frames back together with FFMPEG...${NC}\n"
-ffmpeg -framerate $5 -i video/output/out%d.bmp -c:v libx264 $4
+ffmpeg -framerate $5 -i video/output/out%d.bmp -c:v libx264 $4 > /dev/null 2>&1
 echo -e "${GREEN}$4 has been created. Goodbye :)${NC}\n"

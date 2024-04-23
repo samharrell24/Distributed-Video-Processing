@@ -1,5 +1,9 @@
 # Distributed-Video-Processing
 
+## Cluster
+
+![picture_of_present](content/cluster.JPG)
+
 ### Original Image
 
 ![picture_of_present](content/box.bmp)
